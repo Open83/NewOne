@@ -166,18 +166,34 @@
 
         <div id="test-suite">
             <div class="test-case" id="tc-1">
-                <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null.</div>
+                <div class="log-line" id="log-1">[FAIL] Assertion Error: 'Total_Relationship_Count' calculation missing parameter.</div>
                 <div class="patch-bay">
-                    <input type="text" id="input-1" class="patch-input" placeholder="Enter initialization location...">
-                    <button onclick="executeTest(1, 'coffee shop')">Patch</button>
+                    <input type="text" id="input-1" class="patch-input" placeholder="Enter format: X days...">
+                    <button onclick="executeTest(1, '1095 days')">Patch</button>
                 </div>
             </div>
             
             <div class="test-case" id="tc-2">
-                <div class="log-line" id="log-2">[FAIL] Assertion Error: 'Total_Utilization' calculation missing days and minutes parameter.</div>
+                <div class="log-line" id="log-2">[FAIL] Validation Error: 'Last_Meetup_Date' unrecognized format.</div>
                 <div class="patch-bay">
-                    <input type="text" id="input-2" class="patch-input" placeholder="Enter format: X days, Y minutes...">
-                    <button onclick="executeTest(2, '1095 days, 45 minutes')">Patch</button>
+                    <input type="text" id="input-2" class="patch-input" placeholder="Enter date (dd/mm/yyyy)...">
+                    <button onclick="executeTest(2, '14/02/2024')">Patch</button>
+                </div>
+            </div>
+
+            <div class="test-case" id="tc-3">
+                <div class="log-line" id="log-3">[FAIL] Missing Data: 'First_Day_GYM' timestamp undefined.</div>
+                <div class="patch-bay">
+                    <input type="text" id="input-3" class="patch-input" placeholder="Enter date (dd/mm/yyyy)...">
+                    <button onclick="executeTest(3, '01/05/2023')">Patch</button>
+                </div>
+            </div>
+
+            <div class="test-case" id="tc-4">
+                <div class="log-line" id="log-4">[FAIL] Reference Error: Sayed Asif's 'Favourite_Food' variable is null.</div>
+                <div class="patch-bay">
+                    <input type="text" id="input-4" class="patch-input" placeholder="Enter food name...">
+                    <button onclick="executeTest(4, 'biryani')">Patch</button>
                 </div>
             </div>
         </div>
@@ -249,7 +265,7 @@
 
     // --- PIPELINE LOGIC ---
     let passedTests = 0;
-    const totalTests = 2; 
+    const totalTests = 4; 
 
     function executeTest(testId, expectedValue) {
         const inputElement = document.getElementById(`input-${testId}`);
@@ -280,7 +296,7 @@
         }
     }
 
-    // --- FILE DOWNLOAD LOGIC (Now fully responsive) ---
+    // --- FILE DOWNLOAD LOGIC (Fully responsive) ---
     function downloadLog() {
         const userCode = document.getElementById('user-code').value.trim();
         
@@ -289,7 +305,6 @@
             return;
         }
 
-        // Creates a beautiful, self-contained HTML file engineered for mobile text wrapping
         const fileContent = `
         <!DOCTYPE html>
         <html lang="en">
@@ -315,9 +330,9 @@
                 .variable { color: #4fc1ff; }
                 .string { 
                     color: #ce9178; 
-                    white-space: pre-wrap;       /* Respects line breaks */
-                    word-wrap: break-word;       /* Prevents horizontal overflow */
-                    overflow-wrap: break-word;   /* Modern wrapping standard */
+                    white-space: pre-wrap;       
+                    word-wrap: break-word;       
+                    overflow-wrap: break-word;   
                     font-size: 1rem;
                 }
                 .container { 
@@ -356,7 +371,6 @@
         
         window.URL.revokeObjectURL(url);
 
-        // Update UI to show success and unlock Execute button
         const btnDownload = document.getElementById('btn-download');
         btnDownload.classList.add('success');
         btnDownload.innerHTML = '<span>✓ Script Saved Successfully</span>';
