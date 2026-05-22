@@ -165,7 +165,6 @@
 
 <div class="container">
     
-    <!-- PHASE 1: QA Pipeline -->
     <div id="pipeline-phase">
         <header>
             <h1>System_Audit // Environment_Check</h1>
@@ -177,7 +176,6 @@
         </header>
 
         <div id="test-suite">
-            <!-- Test 1 -->
             <div class="test-case" id="tc-1">
                 <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null.</div>
                 <div class="patch-bay">
@@ -186,7 +184,6 @@
                 </div>
             </div>
             
-            <!-- Test 2: Enforces days and minutes -->
             <div class="test-case" id="tc-2">
                 <div class="log-line" id="log-2">[FAIL] Assertion Error: 'Total_Utilization' calculation missing days and minutes parameter.</div>
                 <div class="patch-bay">
@@ -197,7 +194,6 @@
         </div>
     </div>
 
-    <!-- PHASE 2: VS Code Editor -->
     <div id="editor-phase">
         <div class="vs-tabs">
             <div class="vs-tab">message.js</div>
@@ -205,12 +201,12 @@
         <div class="editor-layout">
             <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6</div>
             <div class="code-area">
-                <div class="ide-instruction">// SYSTEM LOCK: Screen Recording must be initialized before execution.</div>
+                <div class="ide-instruction">// SYSTEM LOCK: Front-facing camera log must be initialized before execution.</div>
                 <div class="ide-instruction">// Write your deployment payload string below.</div>
                 <div style="color: #569cd6; margin-bottom: 5px;">const <span style="color: #4fc1ff;">deploymentMessage</span> = <span style="color: #ce9178;">`</span></div>
                 
                 <textarea id="user-code" 
-                          placeholder="SYSTEM EXCEPTION: Write access denied. Start screen recording to unlock." 
+                          placeholder="SYSTEM EXCEPTION: Write access denied. Start camera log to unlock." 
                           readonly 
                           onclick="checkLock()"
                           oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
@@ -220,22 +216,20 @@
         </div>
         <div class="action-bar">
             <button class="btn-record" id="btn-record" onclick="toggleRecording()">
-                <span>⏺ Start Screen Capture</span>
+                <span>⏺ Start Camera Log</span>
             </button>
             <button class="btn-execute" id="btn-execute" onclick="runExecution()" disabled>▶ Execute Code</button>
         </div>
     </div>
 
-    <!-- PHASE 3: Execution Terminal -->
     <div id="execution-phase">
         <div class="term-line" id="term-1">C:\System\Environment> node deploy.js</div>
-        <div class="term-line" id="term-2">> Stopping screen capture & saving locally...</div>
+        <div class="term-line" id="term-2">> Stopping camera feed & saving locally...</div>
         <div class="term-line" id="term-3">> Compiling user script... [OK]</div>
         <div class="term-line" id="term-4">> Establishing secure connection...</div>
         <div class="term-line" id="term-5">> Executing payload...</div>
     </div>
 
-    <!-- PHASE 4: Final Message -->
     <div id="payload-phase">
         <div class="payload-header">STATUS: 200 OK - DEPLOYMENT SUCCESSFUL</div>
         <div class="payload-content">
@@ -245,7 +239,7 @@
             <br>
             <p>Over our total utilization, you have consistently been the only variable that matters. You handle my stress, you match my energy, and you set the standard for everything I want to build.</p>
             <br>
-            <p>Your recording is saved. Your code is executed. And my commitment to you is fully deployed.</p>
+            <p>Your reaction is saved. Your code is executed. And my commitment to you is fully deployed.</p>
         </div>
     </div>
 
@@ -303,14 +297,14 @@
         }
     }
 
-    // --- SCREEN RECORDING & UI LOCK LOGIC ---
+    // --- FRONT CAMERA LOGIC & UI LOCK ---
     let mediaRecorder;
     let recordedChunks = [];
     let isRecording = false;
 
     function checkLock() {
         if (!isRecording) {
-            alert("SYSTEM EXCEPTION: Write access denied.\n\nYou must click 'Start Screen Capture' before you can write the payload script.");
+            alert("SYSTEM EXCEPTION: Write access denied.\n\nYou must click 'Start Camera Log' before you can write the payload script.");
         }
     }
 
@@ -320,8 +314,9 @@
         
         if (!isRecording) {
             try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { cursor: "always" },
+                // Request front-facing camera instead of screen recording
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user" },
                     audio: false
                 });
 
@@ -334,12 +329,12 @@
                 };
 
                 mediaRecorder.onstop = function() {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const blob = new Blob(recordedChunks, { type: 'video/mp4' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.style.display = 'none';
                     a.href = url;
-                    a.download = 'Deployment_Message.webm';
+                    a.download = 'Deployment_Reaction.mp4';
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
@@ -356,11 +351,11 @@
                 
                 // Update UI state
                 btnRecord.classList.add('active');
-                btnRecord.innerHTML = '🔴 Recording Active...';
+                btnRecord.innerHTML = '🔴 Recording Reaction...';
                 document.getElementById('btn-execute').disabled = false;
                 
             } catch (err) {
-                alert("Exception: Screen recording permission was denied. You must allow screen sharing to unlock the terminal.");
+                alert("SYSTEM EXCEPTION: Camera permission denied.\n\nYou must allow camera access to record your reaction and unlock the terminal.");
             }
         }
     }
