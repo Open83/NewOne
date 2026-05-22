@@ -54,17 +54,6 @@
         h1 { font-size: 1.1rem; color: #58a6ff; }
         .meta-data { font-size: 0.85rem; color: #8b949e; margin-top: 5px; display: flex; flex-direction: column; gap: 4px; }
         
-        .header-input {
-            background: transparent;
-            border: 1px dashed #58a6ff;
-            color: var(--text-main);
-            padding: 2px 5px;
-            font-size: 0.85rem;
-            width: 200px;
-            outline: none;
-        }
-        .header-input:focus { border: 1px solid #58a6ff; }
-
         .test-case {
             border-left: 4px solid var(--fail-color);
             background: var(--input-bg);
@@ -122,7 +111,7 @@
         textarea {
             width: 100%;
             flex: 1;
-            background: rgba(255, 0, 0, 0.05); /* Slight red tint when locked */
+            background: rgba(255, 0, 0, 0.05);
             border: 1px dashed #ff4444;
             color: #ce9178;
             outline: none;
@@ -134,7 +123,6 @@
             transition: all 0.3s ease;
         }
         
-        /* Unlocked state */
         textarea.unlocked {
             background: transparent;
             border: none;
@@ -183,13 +171,13 @@
             <h1>System_Audit // Environment_Check</h1>
             <div class="meta-data">
                 <div>Target: production_environment</div>
-                <!-- Manual input required for explicit 12-hour AM/PM formatting -->
-                <div>Execution Time: <input type="text" class="header-input" id="manual-timestamp" placeholder="YYYY-MM-DD hh:mm AM/PM"></div>
+                <div>Execution Time: <span id="timestamp" style="color: #58a6ff;"></span></div>
                 <div id="coverage-status" style="margin-top: 10px;">Coverage: 0% | Status: BLOCKED</div>
             </div>
         </header>
 
         <div id="test-suite">
+            <!-- Test 1 -->
             <div class="test-case" id="tc-1">
                 <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null.</div>
                 <div class="patch-bay">
@@ -197,6 +185,8 @@
                     <button onclick="executeTest(1, 'coffee shop')">Patch</button>
                 </div>
             </div>
+            
+            <!-- Test 2: Enforces days and minutes -->
             <div class="test-case" id="tc-2">
                 <div class="log-line" id="log-2">[FAIL] Assertion Error: 'Total_Utilization' calculation missing days and minutes parameter.</div>
                 <div class="patch-bay">
@@ -210,7 +200,7 @@
     <!-- PHASE 2: VS Code Editor -->
     <div id="editor-phase">
         <div class="vs-tabs">
-            <div class="vs-tab">messageToSayed.js</div>
+            <div class="vs-tab">message.js</div>
         </div>
         <div class="editor-layout">
             <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6</div>
@@ -219,7 +209,6 @@
                 <div class="ide-instruction">// Write your deployment payload string below.</div>
                 <div style="color: #569cd6; margin-bottom: 5px;">const <span style="color: #4fc1ff;">deploymentMessage</span> = <span style="color: #ce9178;">`</span></div>
                 
-                <!-- Locked Textarea -->
                 <textarea id="user-code" 
                           placeholder="SYSTEM EXCEPTION: Write access denied. Start screen recording to unlock." 
                           readonly 
@@ -239,7 +228,7 @@
 
     <!-- PHASE 3: Execution Terminal -->
     <div id="execution-phase">
-        <div class="term-line" id="term-1">C:\Users\Admin\Environment> node deploy.js</div>
+        <div class="term-line" id="term-1">C:\System\Environment> node deploy.js</div>
         <div class="term-line" id="term-2">> Stopping screen capture & saving locally...</div>
         <div class="term-line" id="term-3">> Compiling user script... [OK]</div>
         <div class="term-line" id="term-4">> Establishing secure connection...</div>
@@ -250,27 +239,42 @@
     <div id="payload-phase">
         <div class="payload-header">STATUS: 200 OK - DEPLOYMENT SUCCESSFUL</div>
         <div class="payload-content">
-            <p><strong>System override complete.</strong></p>
+            <p><strong>System override complete. All parameters verified.</strong></p>
             <br>
-            <p>Your actual message goes here.</p>
+            <p>I didn't build this to just send you a generic message. I built this because standard formats don't accurately capture your impact. You don't just patch the bugs in my day; you are the core architecture of my future.</p>
+            <br>
+            <p>Over our total utilization, you have consistently been the only variable that matters. You handle my stress, you match my energy, and you set the standard for everything I want to build.</p>
+            <br>
+            <p>Your recording is saved. Your code is executed. And my commitment to you is fully deployed.</p>
         </div>
     </div>
 
 </div>
 
 <script>
+    // --- AUTOMATED TIME INIT (Strict 12-hour AM/PM) ---
+    function initTimestamp() {
+        const now = new Date();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        
+        const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${hours}:${minutes} ${ampm}`;
+        document.getElementById('timestamp').innerText = timeString;
+    }
+    
+    // Fire immediately on load
+    initTimestamp();
+
     // --- PIPELINE LOGIC ---
     let passedTests = 0;
     const totalTests = 2; 
 
     function executeTest(testId, expectedValue) {
-        // Enforce manual timestamp before proceeding
-        const timestampInput = document.getElementById('manual-timestamp').value.trim();
-        if (timestampInput === '') {
-            alert("SYSTEM EXCEPTION: Document header 'Execution Time' must be manually filled before patching bugs.");
-            return;
-        }
-
         const inputElement = document.getElementById(`input-${testId}`);
         const userValue = inputElement.value.trim().toLowerCase();
         const testContainer = document.getElementById(`tc-${testId}`);
@@ -335,7 +339,7 @@
                     const a = document.createElement('a');
                     a.style.display = 'none';
                     a.href = url;
-                    a.download = 'Deployment_Message_Recording.webm';
+                    a.download = 'Deployment_Message.webm';
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
