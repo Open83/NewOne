@@ -6,7 +6,7 @@
     <title>System Architecture & Deployment</title>
     <style>
         :root {
-            var(--bg-color): #0d1117;
+            --bg-color: #0d1117;
             --text-main: #c9d1d9;
             --fail-color: #ff7b72;
             --pass-color: #3fb950;
@@ -28,7 +28,7 @@
         }
 
         body {
-            background-color: #0d1117;
+            background-color: var(--bg-color);
             color: var(--text-main);
             padding: 15px;
             line-height: 1.6;
@@ -52,7 +52,18 @@
         #pipeline-phase { padding: 20px; }
         header { border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
         h1 { font-size: 1.1rem; color: #58a6ff; }
-        .meta-data { font-size: 0.8rem; color: #8b949e; margin-top: 5px; }
+        .meta-data { font-size: 0.85rem; color: #8b949e; margin-top: 5px; display: flex; flex-direction: column; gap: 4px; }
+        
+        .header-input {
+            background: transparent;
+            border: 1px dashed #58a6ff;
+            color: var(--text-main);
+            padding: 2px 5px;
+            font-size: 0.85rem;
+            width: 200px;
+            outline: none;
+        }
+        .header-input:focus { border: 1px solid #58a6ff; }
 
         .test-case {
             border-left: 4px solid var(--fail-color);
@@ -69,7 +80,7 @@
         .patch-bay { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         @media (min-width: 480px) { .patch-bay { flex-direction: row; } }
 
-        input {
+        input.patch-input {
             flex: 1;
             background: #0d1117;
             border: 1px solid var(--border-color);
@@ -79,7 +90,7 @@
             outline: none;
             font-size: 16px;
         }
-        input:focus { border-color: #58a6ff; }
+        input.patch-input:focus { border-color: #58a6ff; }
 
         button {
             background: var(--border-color);
@@ -108,18 +119,26 @@
 
         .ide-instruction { color: #6a9955; margin-bottom: 5px; font-size: 0.9rem; }
         
-        /* Auto-expanding responsive textarea */
         textarea {
             width: 100%;
             flex: 1;
-            background: transparent;
-            border: none;
+            background: rgba(255, 0, 0, 0.05); /* Slight red tint when locked */
+            border: 1px dashed #ff4444;
             color: #ce9178;
             outline: none;
             resize: none;
             font-size: 16px;
             line-height: 1.5;
             min-height: 150px;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Unlocked state */
+        textarea.unlocked {
+            background: transparent;
+            border: none;
+            padding: 0;
         }
 
         .action-bar {
@@ -133,18 +152,8 @@
             gap: 10px;
         }
 
-        .btn-record {
-            background: transparent;
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-record.active {
-            background: rgba(255, 68, 68, 0.1);
-            animation: pulse 2s infinite;
-        }
+        .btn-record { background: transparent; border: 1px solid #ff4444; color: #ff4444; display: flex; align-items: center; gap: 8px; }
+        .btn-record.active { background: rgba(255, 68, 68, 0.1); animation: pulse 2s infinite; }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
@@ -155,11 +164,9 @@
         .btn-execute:hover:not(:disabled) { background: #005f9e; }
         .btn-execute:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-        /* --- PHASE 3: EXECUTION TERMINAL --- */
+        /* --- PHASE 3: EXECUTION TERMINAL & PHASE 4: PAYLOAD --- */
         #execution-phase { display: none; padding: 20px; background: #000; color: #32cd32; min-height: 300px; }
         .term-line { opacity: 0; margin-bottom: 8px; font-size: 0.9rem; }
-
-        /* --- PHASE 4: FINAL PAYLOAD --- */
         #payload-phase { display: none; padding: 30px 20px; animation: fadeIn 1s ease-in; }
         .payload-header { color: var(--pass-color); margin-bottom: 20px; font-size: 1.2rem; border-bottom: 1px dashed var(--pass-color); padding-bottom: 10px; }
         .payload-content { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: #e6edf3; font-size: 1rem; }
@@ -176,8 +183,9 @@
             <h1>System_Audit // Environment_Check</h1>
             <div class="meta-data">
                 <div>Target: production_environment</div>
-                <div>Execution Time: <span id="timestamp"></span></div>
-                <div id="coverage-status">Coverage: 0% | Status: BLOCKED</div>
+                <!-- Manual input required for explicit 12-hour AM/PM formatting -->
+                <div>Execution Time: <input type="text" class="header-input" id="manual-timestamp" placeholder="YYYY-MM-DD hh:mm AM/PM"></div>
+                <div id="coverage-status" style="margin-top: 10px;">Coverage: 0% | Status: BLOCKED</div>
             </div>
         </header>
 
@@ -185,15 +193,15 @@
             <div class="test-case" id="tc-1">
                 <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null.</div>
                 <div class="patch-bay">
-                    <input type="text" id="input-1" placeholder="Enter initialization location...">
+                    <input type="text" id="input-1" class="patch-input" placeholder="Enter initialization location...">
                     <button onclick="executeTest(1, 'coffee shop')">Patch</button>
                 </div>
             </div>
             <div class="test-case" id="tc-2">
-                <div class="log-line" id="log-2">[FAIL] Assertion Error: Expected integer mismatch.</div>
+                <div class="log-line" id="log-2">[FAIL] Assertion Error: 'Total_Utilization' calculation missing days and minutes parameter.</div>
                 <div class="patch-bay">
-                    <input type="text" id="input-2" placeholder="Enter exact numeric value...">
-                    <button onclick="executeTest(2, '1095')">Patch</button>
+                    <input type="text" id="input-2" class="patch-input" placeholder="Enter format: X days, Y minutes...">
+                    <button onclick="executeTest(2, '1095 days, 45 minutes')">Patch</button>
                 </div>
             </div>
         </div>
@@ -210,9 +218,15 @@
                 <div class="ide-instruction">// SYSTEM LOCK: Screen Recording must be initialized before execution.</div>
                 <div class="ide-instruction">// Write your deployment payload string below.</div>
                 <div style="color: #569cd6; margin-bottom: 5px;">const <span style="color: #4fc1ff;">deploymentMessage</span> = <span style="color: #ce9178;">`</span></div>
-                <!-- Auto expanding textarea -->
-                <textarea id="user-code" placeholder="Type your message here..." oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
-                <div style="color: #ce9178;">`<span style="color: #d4d4d4;">;</span></div>
+                
+                <!-- Locked Textarea -->
+                <textarea id="user-code" 
+                          placeholder="SYSTEM EXCEPTION: Write access denied. Start screen recording to unlock." 
+                          readonly 
+                          onclick="checkLock()"
+                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                          
+                <div style="color: #ce9178; margin-top: 5px;">`<span style="color: #d4d4d4;">;</span></div>
             </div>
         </div>
         <div class="action-bar">
@@ -225,7 +239,7 @@
 
     <!-- PHASE 3: Execution Terminal -->
     <div id="execution-phase">
-        <div class="term-line" id="term-1">C:\Users\Sayed\Environment> node deploy.js</div>
+        <div class="term-line" id="term-1">C:\Users\Admin\Environment> node deploy.js</div>
         <div class="term-line" id="term-2">> Stopping screen capture & saving locally...</div>
         <div class="term-line" id="term-3">> Compiling user script... [OK]</div>
         <div class="term-line" id="term-4">> Establishing secure connection...</div>
@@ -236,36 +250,27 @@
     <div id="payload-phase">
         <div class="payload-header">STATUS: 200 OK - DEPLOYMENT SUCCESSFUL</div>
         <div class="payload-content">
-            <p><strong>To the girl who passed the test suite:</strong></p>
+            <p><strong>System override complete.</strong></p>
             <br>
-            <p>Your actual, flawlessly formatted message goes here. No cringe. Just facts and structure.</p>
+            <p>Your actual message goes here.</p>
         </div>
     </div>
 
 </div>
 
 <script>
-    // --- TIME INIT (Strict 12-hour AM/PM) ---
-    function initTimestamp() {
-        const now = new Date();
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        
-        hours = hours % 12;
-        hours = hours ? hours : 12; 
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        
-        const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${hours}:${minutes} ${ampm}`;
-        document.getElementById('timestamp').innerText = timeString;
-    }
-    initTimestamp();
-
     // --- PIPELINE LOGIC ---
     let passedTests = 0;
-    const totalTests = 2; // Shortened for demo layout, add more HTML if needed
+    const totalTests = 2; 
 
     function executeTest(testId, expectedValue) {
+        // Enforce manual timestamp before proceeding
+        const timestampInput = document.getElementById('manual-timestamp').value.trim();
+        if (timestampInput === '') {
+            alert("SYSTEM EXCEPTION: Document header 'Execution Time' must be manually filled before patching bugs.");
+            return;
+        }
+
         const inputElement = document.getElementById(`input-${testId}`);
         const userValue = inputElement.value.trim().toLowerCase();
         const testContainer = document.getElementById(`tc-${testId}`);
@@ -294,17 +299,23 @@
         }
     }
 
-    // --- SCREEN RECORDING LOGIC ---
+    // --- SCREEN RECORDING & UI LOCK LOGIC ---
     let mediaRecorder;
     let recordedChunks = [];
     let isRecording = false;
 
+    function checkLock() {
+        if (!isRecording) {
+            alert("SYSTEM EXCEPTION: Write access denied.\n\nYou must click 'Start Screen Capture' before you can write the payload script.");
+        }
+    }
+
     async function toggleRecording() {
         const btnRecord = document.getElementById('btn-record');
+        const textArea = document.getElementById('user-code');
         
         if (!isRecording) {
             try {
-                // Request screen sharing from the OS
                 const stream = await navigator.mediaDevices.getDisplayMedia({
                     video: { cursor: "always" },
                     audio: false
@@ -319,7 +330,6 @@
                 };
 
                 mediaRecorder.onstop = function() {
-                    // Triggers the file download when stopped
                     const blob = new Blob(recordedChunks, { type: 'video/webm' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -329,15 +339,18 @@
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
-                    
-                    // Cleanup stream
                     stream.getTracks().forEach(track => track.stop());
                 };
 
                 mediaRecorder.start();
                 isRecording = true;
                 
-                // Update UI to show recording state & unlock execution
+                // UNLOCK THE TEXT AREA
+                textArea.removeAttribute('readonly');
+                textArea.classList.add('unlocked');
+                textArea.placeholder = "Write your deployment message here...";
+                
+                // Update UI state
                 btnRecord.classList.add('active');
                 btnRecord.innerHTML = '🔴 Recording Active...';
                 document.getElementById('btn-execute').disabled = false;
@@ -357,7 +370,6 @@
             return;
         }
 
-        // Stop the recorder. This fires the mediaRecorder.onstop event, triggering the download.
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
