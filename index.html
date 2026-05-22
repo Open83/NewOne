@@ -6,14 +6,12 @@
     <title>System Architecture & Deployment</title>
     <style>
         :root {
-            /* Pipeline Colors */
-            --bg-color: #0d1117;
+            var(--bg-color): #0d1117;
             --text-main: #c9d1d9;
             --fail-color: #ff7b72;
             --pass-color: #3fb950;
             --border-color: #30363d;
             --input-bg: #010409;
-            /* VS Code Colors */
             --vs-bg: #1e1e1e;
             --vs-tab-bg: #2d2d2d;
             --vs-active-tab: #1e1e1e;
@@ -30,7 +28,7 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: #0d1117;
             color: var(--text-main);
             padding: 15px;
             line-height: 1.6;
@@ -51,23 +49,10 @@
         }
 
         /* --- PHASE 1: QA PIPELINE --- */
-        #pipeline-phase {
-            padding: 20px;
-        }
-
-        header {
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
+        #pipeline-phase { padding: 20px; }
+        header { border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
         h1 { font-size: 1.1rem; color: #58a6ff; }
-        
-        .meta-data {
-            font-size: 0.8rem;
-            color: #8b949e;
-            margin-top: 5px;
-        }
+        .meta-data { font-size: 0.8rem; color: #8b949e; margin-top: 5px; }
 
         .test-case {
             border-left: 4px solid var(--fail-color);
@@ -77,33 +62,23 @@
             border-radius: 4px;
             transition: border-color 0.3s ease;
         }
-
         .test-case.passed { border-left-color: var(--pass-color); }
         .log-line { font-size: 0.85rem; margin-bottom: 10px; color: var(--fail-color); }
         .test-case.passed .log-line { color: var(--pass-color); }
 
-        .patch-bay {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        @media (min-width: 480px) {
-            .patch-bay { flex-direction: row; }
-        }
+        .patch-bay { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        @media (min-width: 480px) { .patch-bay { flex-direction: row; } }
 
         input {
             flex: 1;
-            background: var(--bg-color);
+            background: #0d1117;
             border: 1px solid var(--border-color);
             color: var(--text-main);
             padding: 10px;
             border-radius: 4px;
             outline: none;
-            font-size: 16px; /* Prevents iOS zoom */
+            font-size: 16px;
         }
-
         input:focus { border-color: #58a6ff; }
 
         button {
@@ -116,7 +91,6 @@
             font-weight: bold;
             transition: background 0.2s;
         }
-
         button:hover { background: #8b949e; color: #010409; }
 
         /* --- PHASE 2: VS CODE EDITOR --- */
@@ -125,121 +99,71 @@
             background: var(--vs-bg);
             color: var(--vs-text);
         }
+        .vs-tabs { display: flex; background: var(--vs-tab-bg); font-size: 0.85rem; overflow-x: auto; }
+        .vs-tab { padding: 8px 15px; background: var(--vs-active-tab); border-top: 2px solid var(--vs-accent); color: white; white-space: nowrap; }
 
-        .vs-tabs {
-            display: flex;
-            background: var(--vs-tab-bg);
-            font-size: 0.85rem;
-            overflow-x: auto;
-        }
+        .editor-layout { display: flex; min-height: 400px; max-height: 60vh; }
+        .line-numbers { padding: 15px 10px; background: var(--vs-bg); color: var(--vs-line-num); text-align: right; border-right: 1px solid #333; user-select: none; font-size: 0.9rem; }
+        .code-area { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; }
 
-        .vs-tab {
-            padding: 8px 15px;
-            background: var(--vs-active-tab);
-            border-top: 2px solid var(--vs-accent);
-            color: white;
-            white-space: nowrap;
-        }
-
-        .editor-layout {
-            display: flex;
-            min-height: 250px;
-        }
-
-        .line-numbers {
-            padding: 15px 10px;
-            background: var(--vs-bg);
-            color: var(--vs-line-num);
-            text-align: right;
-            border-right: 1px solid #333;
-            user-select: none;
-            font-size: 0.9rem;
-        }
-
-        .code-area {
-            flex: 1;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .ide-instruction {
-            color: #6a9955; /* VS Code comment color */
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
+        .ide-instruction { color: #6a9955; margin-bottom: 5px; font-size: 0.9rem; }
+        
+        /* Auto-expanding responsive textarea */
         textarea {
             width: 100%;
             flex: 1;
             background: transparent;
             border: none;
-            color: #ce9178; /* VS Code string color */
+            color: #ce9178;
             outline: none;
             resize: none;
             font-size: 16px;
             line-height: 1.5;
+            min-height: 150px;
         }
 
         .action-bar {
             padding: 15px;
             background: #252526;
-            text-align: right;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-top: 1px solid #333;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .btn-execute {
-            background: var(--vs-accent);
-            color: white;
+        .btn-record {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-record.active {
+            background: rgba(255, 68, 68, 0.1);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
         }
 
-        .btn-execute:hover {
-            background: #005f9e;
-            color: white;
-        }
+        .btn-execute { background: var(--vs-accent); color: white; opacity: 1; }
+        .btn-execute:hover:not(:disabled) { background: #005f9e; }
+        .btn-execute:disabled { background: #333; color: #666; cursor: not-allowed; }
 
         /* --- PHASE 3: EXECUTION TERMINAL --- */
-        #execution-phase {
-            display: none;
-            padding: 20px;
-            background: #000;
-            color: #32cd32;
-            min-height: 300px;
-        }
-
-        .term-line {
-            opacity: 0;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
+        #execution-phase { display: none; padding: 20px; background: #000; color: #32cd32; min-height: 300px; }
+        .term-line { opacity: 0; margin-bottom: 8px; font-size: 0.9rem; }
 
         /* --- PHASE 4: FINAL PAYLOAD --- */
-        #payload-phase {
-            display: none;
-            padding: 30px 20px;
-            background: var(--bg-color);
-            animation: fadeIn 1s ease-in;
-        }
-
-        .payload-header {
-            color: var(--pass-color);
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            border-bottom: 1px dashed var(--pass-color);
-            padding-bottom: 10px;
-        }
-
-        .payload-content {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.8;
-            color: #e6edf3;
-            font-size: 1rem;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        #payload-phase { display: none; padding: 30px 20px; animation: fadeIn 1s ease-in; }
+        .payload-header { color: var(--pass-color); margin-bottom: 20px; font-size: 1.2rem; border-bottom: 1px dashed var(--pass-color); padding-bottom: 10px; }
+        .payload-content { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: #e6edf3; font-size: 1rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -251,37 +175,25 @@
         <header>
             <h1>System_Audit // Environment_Check</h1>
             <div class="meta-data">
-                <div>Target: C:\Users\Sayed\Deployment</div>
+                <div>Target: production_environment</div>
                 <div>Execution Time: <span id="timestamp"></span></div>
                 <div id="coverage-status">Coverage: 0% | Status: BLOCKED</div>
             </div>
         </header>
 
         <div id="test-suite">
-            <!-- Test 1 -->
             <div class="test-case" id="tc-1">
-                <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null for initialization_event.</div>
+                <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null.</div>
                 <div class="patch-bay">
                     <input type="text" id="input-1" placeholder="Enter initialization location...">
                     <button onclick="executeTest(1, 'coffee shop')">Patch</button>
                 </div>
             </div>
-
-            <!-- Test 2 -->
             <div class="test-case" id="tc-2">
-                <div class="log-line" id="log-2">[FAIL] Assertion Error: Expected integer for 'Total_Utilization_Days' mismatch.</div>
+                <div class="log-line" id="log-2">[FAIL] Assertion Error: Expected integer mismatch.</div>
                 <div class="patch-bay">
                     <input type="text" id="input-2" placeholder="Enter exact numeric value...">
                     <button onclick="executeTest(2, '1095')">Patch</button>
-                </div>
-            </div>
-
-            <!-- Test 3 -->
-            <div class="test-case" id="tc-3">
-                <div class="log-line" id="log-3">[FAIL] Validation Error: Target 'Favorite_Order' unrecognized hash.</div>
-                <div class="patch-bay">
-                    <input type="text" id="input-3" placeholder="Enter valid order string...">
-                    <button onclick="executeTest(3, 'iced latte')">Patch</button>
                 </div>
             </div>
         </div>
@@ -291,30 +203,31 @@
     <div id="editor-phase">
         <div class="vs-tabs">
             <div class="vs-tab">messageToSayed.js</div>
-            <div style="padding: 8px 15px; color: #858585;">package.json</div>
         </div>
         <div class="editor-layout">
-            <div class="line-numbers">
-                1<br>2<br>3<br>4<br>5<br>6
-            </div>
+            <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6</div>
             <div class="code-area">
-                <div class="ide-instruction">// Write a deployment script or message for me below.</div>
-                <div class="ide-instruction">// Must be written before system execution can proceed.</div>
+                <div class="ide-instruction">// SYSTEM LOCK: Screen Recording must be initialized before execution.</div>
+                <div class="ide-instruction">// Write your deployment payload string below.</div>
                 <div style="color: #569cd6; margin-bottom: 5px;">const <span style="color: #4fc1ff;">deploymentMessage</span> = <span style="color: #ce9178;">`</span></div>
-                <textarea id="user-code" placeholder="Type your code/message here..."></textarea>
+                <!-- Auto expanding textarea -->
+                <textarea id="user-code" placeholder="Type your message here..." oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
                 <div style="color: #ce9178;">`<span style="color: #d4d4d4;">;</span></div>
             </div>
         </div>
         <div class="action-bar">
-            <button class="btn-execute" onclick="runExecution()">▶ Execute Code</button>
+            <button class="btn-record" id="btn-record" onclick="toggleRecording()">
+                <span>⏺ Start Screen Capture</span>
+            </button>
+            <button class="btn-execute" id="btn-execute" onclick="runExecution()" disabled>▶ Execute Code</button>
         </div>
     </div>
 
     <!-- PHASE 3: Execution Terminal -->
     <div id="execution-phase">
         <div class="term-line" id="term-1">C:\Users\Sayed\Environment> node deploy.js</div>
-        <div class="term-line" id="term-2">> Compiling user script...</div>
-        <div class="term-line" id="term-3">> Validating message syntax... [OK]</div>
+        <div class="term-line" id="term-2">> Stopping screen capture & saving locally...</div>
+        <div class="term-line" id="term-3">> Compiling user script... [OK]</div>
         <div class="term-line" id="term-4">> Establishing secure connection...</div>
         <div class="term-line" id="term-5">> Executing payload...</div>
     </div>
@@ -323,19 +236,16 @@
     <div id="payload-phase">
         <div class="payload-header">STATUS: 200 OK - DEPLOYMENT SUCCESSFUL</div>
         <div class="payload-content">
-            <p><strong>To the girl who patched all the bugs in my life:</strong></p>
+            <p><strong>To the girl who passed the test suite:</strong></p>
             <br>
-            <p>Write your actual, beautifully structured message right here. Break down the logic of why she matters to you. No gimmicks, just clean, irrefutable truth formatted with high-end typography.</p>
+            <p>Your actual, flawlessly formatted message goes here. No cringe. Just facts and structure.</p>
         </div>
     </div>
 
 </div>
 
 <script>
-    let passedTests = 0;
-    const totalTests = 3;
-
-    // Strict 12-hour AM/PM format logic
+    // --- TIME INIT (Strict 12-hour AM/PM) ---
     function initTimestamp() {
         const now = new Date();
         let hours = now.getHours();
@@ -349,10 +259,12 @@
         const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${hours}:${minutes} ${ampm}`;
         document.getElementById('timestamp').innerText = timeString;
     }
-
     initTimestamp();
 
-    // QA Pipeline Logic
+    // --- PIPELINE LOGIC ---
+    let passedTests = 0;
+    const totalTests = 2; // Shortened for demo layout, add more HTML if needed
+
     function executeTest(testId, expectedValue) {
         const inputElement = document.getElementById(`input-${testId}`);
         const userValue = inputElement.value.trim().toLowerCase();
@@ -367,66 +279,107 @@
                 inputElement.style.opacity = '0.5';
                 
                 passedTests++;
-                updateCoverage();
+                if (passedTests === totalTests) {
+                    document.getElementById('coverage-status').innerText = `Coverage: 100% | Status: REDIRECTING TO IDE...`;
+                    document.getElementById('coverage-status').style.color = '#3fb950';
+                    setTimeout(() => {
+                        document.getElementById('pipeline-phase').style.display = 'none';
+                        document.getElementById('editor-phase').style.display = 'block';
+                    }, 1200);
+                }
             }
         } else {
             logLine.innerText = `[FAIL] Compilation failed. Invalid input provided.`;
             inputElement.value = '';
-            inputElement.placeholder = "Traceback: Incorrect variable. Retry...";
         }
     }
 
-    function updateCoverage() {
-        const percentage = Math.round((passedTests / totalTests) * 100);
-        const coverageDisplay = document.getElementById('coverage-status');
+    // --- SCREEN RECORDING LOGIC ---
+    let mediaRecorder;
+    let recordedChunks = [];
+    let isRecording = false;
+
+    async function toggleRecording() {
+        const btnRecord = document.getElementById('btn-record');
         
-        if (passedTests === totalTests) {
-            coverageDisplay.innerText = `Coverage: 100% | Status: REDIRECTING TO IDE...`;
-            coverageDisplay.style.color = '#3fb950';
-            setTimeout(() => {
-                document.getElementById('pipeline-phase').style.display = 'none';
-                document.getElementById('editor-phase').style.display = 'block';
-            }, 1200);
-        } else {
-            coverageDisplay.innerText = `Coverage: ${percentage}% | Status: BLOCKED`;
+        if (!isRecording) {
+            try {
+                // Request screen sharing from the OS
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: false
+                });
+
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) {
+                        recordedChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = function() {
+                    // Triggers the file download when stopped
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Deployment_Message_Recording.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    // Cleanup stream
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update UI to show recording state & unlock execution
+                btnRecord.classList.add('active');
+                btnRecord.innerHTML = '🔴 Recording Active...';
+                document.getElementById('btn-execute').disabled = false;
+                
+            } catch (err) {
+                alert("Exception: Screen recording permission was denied. You must allow screen sharing to unlock the terminal.");
+            }
         }
     }
 
-    // IDE Execution Logic
+    // --- IDE EXECUTION LOGIC ---
     function runExecution() {
         const userCode = document.getElementById('user-code').value.trim();
         
-        // Ensure she actually writes something
         if (userCode.length < 3) {
             alert("Exception: Script is empty. Please write a message before executing.");
             return;
         }
 
-        // Hide editor, show terminal
+        // Stop the recorder. This fires the mediaRecorder.onstop event, triggering the download.
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+
         document.getElementById('editor-phase').style.display = 'none';
         document.getElementById('execution-phase').style.display = 'block';
 
-        // Terminal animation sequence
         const lines = [1, 2, 3, 4, 5];
         let delay = 0;
 
         lines.forEach((lineNum, index) => {
             setTimeout(() => {
                 document.getElementById(`term-${lineNum}`).style.opacity = '1';
-                
-                // If it's the last line, trigger the final reveal
                 if (index === lines.length - 1) {
-                    setTimeout(revealPayload, 1000);
+                    setTimeout(() => {
+                        document.getElementById('execution-phase').style.display = 'none';
+                        document.getElementById('payload-phase').style.display = 'block';
+                    }, 1000);
                 }
             }, delay);
-            // Stagger the terminal lines appearing
-            delay += Math.floor(Math.random() * 600) + 400; 
+            delay += Math.floor(Math.random() * 500) + 400; 
         });
-    }
-
-    function revealPayload() {
-        document.getElementById('execution-phase').style.display = 'none';
-        document.getElementById('payload-phase').style.display = 'block';
     }
 </script>
 
