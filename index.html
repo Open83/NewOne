@@ -2,16 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CI/CD Pipeline | System Audit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>System Architecture & Deployment</title>
     <style>
         :root {
+            /* Pipeline Colors */
             --bg-color: #0d1117;
             --text-main: #c9d1d9;
             --fail-color: #ff7b72;
             --pass-color: #3fb950;
             --border-color: #30363d;
             --input-bg: #010409;
+            /* VS Code Colors */
+            --vs-bg: #1e1e1e;
+            --vs-tab-bg: #2d2d2d;
+            --vs-active-tab: #1e1e1e;
+            --vs-accent: #007acc;
+            --vs-text: #d4d4d4;
+            --vs-line-num: #858585;
         }
 
         * {
@@ -24,17 +32,27 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 20px;
+            padding: 15px;
             line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
 
-        #pipeline-container {
+        .container {
+            width: 100%;
             max-width: 800px;
-            margin: 0 auto;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 20px;
             background: #161b22;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* --- PHASE 1: QA PIPELINE --- */
+        #pipeline-phase {
+            padding: 20px;
         }
 
         header {
@@ -43,13 +61,10 @@
             margin-bottom: 20px;
         }
 
-        h1 {
-            font-size: 1.2rem;
-            color: #58a6ff;
-        }
-
+        h1 { font-size: 1.1rem; color: #58a6ff; }
+        
         .meta-data {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #8b949e;
             margin-top: 5px;
         }
@@ -57,30 +72,25 @@
         .test-case {
             border-left: 4px solid var(--fail-color);
             background: var(--input-bg);
-            padding: 15px;
+            padding: 12px;
             margin-bottom: 15px;
             border-radius: 4px;
             transition: border-color 0.3s ease;
         }
 
-        .test-case.passed {
-            border-left-color: var(--pass-color);
-        }
-
-        .log-line {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-            color: var(--fail-color);
-        }
-
-        .test-case.passed .log-line {
-            color: var(--pass-color);
-        }
+        .test-case.passed { border-left-color: var(--pass-color); }
+        .log-line { font-size: 0.85rem; margin-bottom: 10px; color: var(--fail-color); }
+        .test-case.passed .log-line { color: var(--pass-color); }
 
         .patch-bay {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             margin-top: 10px;
+        }
+
+        @media (min-width: 480px) {
+            .patch-bay { flex-direction: row; }
         }
 
         input {
@@ -88,107 +98,244 @@
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 8px;
+            padding: 10px;
             border-radius: 4px;
             outline: none;
+            font-size: 16px; /* Prevents iOS zoom */
         }
 
-        input:focus {
-            border-color: #58a6ff;
-        }
+        input:focus { border-color: #58a6ff; }
 
         button {
             background: var(--border-color);
             color: var(--text-main);
             border: none;
-            padding: 8px 16px;
+            padding: 10px 16px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
             transition: background 0.2s;
         }
 
-        button:hover {
-            background: #8b949e;
-            color: #010409;
+        button:hover { background: #8b949e; color: #010409; }
+
+        /* --- PHASE 2: VS CODE EDITOR --- */
+        #editor-phase {
+            display: none;
+            background: var(--vs-bg);
+            color: var(--vs-text);
         }
 
-        #deployment-payload {
+        .vs-tabs {
+            display: flex;
+            background: var(--vs-tab-bg);
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .vs-tab {
+            padding: 8px 15px;
+            background: var(--vs-active-tab);
+            border-top: 2px solid var(--vs-accent);
+            color: white;
+            white-space: nowrap;
+        }
+
+        .editor-layout {
+            display: flex;
+            min-height: 250px;
+        }
+
+        .line-numbers {
+            padding: 15px 10px;
+            background: var(--vs-bg);
+            color: var(--vs-line-num);
+            text-align: right;
+            border-right: 1px solid #333;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+
+        .code-area {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ide-instruction {
+            color: #6a9955; /* VS Code comment color */
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ce9178; /* VS Code string color */
+            outline: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .action-bar {
+            padding: 15px;
+            background: #252526;
+            text-align: right;
+            border-top: 1px solid #333;
+        }
+
+        .btn-execute {
+            background: var(--vs-accent);
+            color: white;
+        }
+
+        .btn-execute:hover {
+            background: #005f9e;
+            color: white;
+        }
+
+        /* --- PHASE 3: EXECUTION TERMINAL --- */
+        #execution-phase {
             display: none;
-            margin-top: 30px;
             padding: 20px;
-            border: 1px dashed var(--pass-color);
-            background: rgba(63, 185, 80, 0.1);
-            border-radius: 6px;
+            background: #000;
+            color: #32cd32;
+            min-height: 300px;
+        }
+
+        .term-line {
+            opacity: 0;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* --- PHASE 4: FINAL PAYLOAD --- */
+        #payload-phase {
+            display: none;
+            padding: 30px 20px;
+            background: var(--bg-color);
             animation: fadeIn 1s ease-in;
+        }
+
+        .payload-header {
+            color: var(--pass-color);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            border-bottom: 1px dashed var(--pass-color);
+            padding-bottom: 10px;
+        }
+
+        .payload-content {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.8;
+            color: #e6edf3;
+            font-size: 1rem;
         }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .success-header {
-            color: var(--pass-color);
-            margin-bottom: 15px;
-        }
     </style>
 </head>
 <body>
 
-<div id="pipeline-container">
-    <header>
-        <h1>System_Audit // E2E_Verification_Suite</h1>
-        <div class="meta-data">
-            <div>Target: production_environment</div>
-            <div>Execution Time: <span id="timestamp"></span></div>
-            <div id="coverage-status">Coverage: 0% | Status: BLOCKED</div>
-        </div>
-    </header>
-
-    <div id="test-suite">
-        <!-- Test 1 -->
-        <div class="test-case" id="tc-1">
-            <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null for initialization_event.</div>
-            <div class="patch-bay">
-                <input type="text" id="input-1" placeholder="Enter initialization location string...">
-                <button onclick="executeTest(1, 'coffee shop')">Patch</button>
+<div class="container">
+    
+    <!-- PHASE 1: QA Pipeline -->
+    <div id="pipeline-phase">
+        <header>
+            <h1>System_Audit // Environment_Check</h1>
+            <div class="meta-data">
+                <div>Target: C:\Users\Sayed\Deployment</div>
+                <div>Execution Time: <span id="timestamp"></span></div>
+                <div id="coverage-status">Coverage: 0% | Status: BLOCKED</div>
             </div>
-        </div>
+        </header>
 
-        <!-- Test 2 -->
-        <div class="test-case" id="tc-2">
-            <div class="log-line" id="log-2">[FAIL] Assertion Error: Expected integer for 'Total_Utilization_Days' does not match memory_cache.</div>
-            <div class="patch-bay">
-                <input type="text" id="input-2" placeholder="Enter numeric value for total days...">
-                <button onclick="executeTest(2, '1095')">Patch</button>
+        <div id="test-suite">
+            <!-- Test 1 -->
+            <div class="test-case" id="tc-1">
+                <div class="log-line" id="log-1">[FAIL] Fatal Error: Parameter 'Location' returned null for initialization_event.</div>
+                <div class="patch-bay">
+                    <input type="text" id="input-1" placeholder="Enter initialization location...">
+                    <button onclick="executeTest(1, 'coffee shop')">Patch</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Test 3 -->
-        <div class="test-case" id="tc-3">
-            <div class="log-line" id="log-3">[FAIL] Validation Error: String 'Favorite_Order' contains unrecognized hash.</div>
-            <div class="patch-bay">
-                <input type="text" id="input-3" placeholder="Enter valid order string...">
-                <button onclick="executeTest(3, 'iced latte')">Patch</button>
+            <!-- Test 2 -->
+            <div class="test-case" id="tc-2">
+                <div class="log-line" id="log-2">[FAIL] Assertion Error: Expected integer for 'Total_Utilization_Days' mismatch.</div>
+                <div class="patch-bay">
+                    <input type="text" id="input-2" placeholder="Enter exact numeric value...">
+                    <button onclick="executeTest(2, '1095')">Patch</button>
+                </div>
+            </div>
+
+            <!-- Test 3 -->
+            <div class="test-case" id="tc-3">
+                <div class="log-line" id="log-3">[FAIL] Validation Error: Target 'Favorite_Order' unrecognized hash.</div>
+                <div class="patch-bay">
+                    <input type="text" id="input-3" placeholder="Enter valid order string...">
+                    <button onclick="executeTest(3, 'iced latte')">Patch</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Payload -->
-    <div id="deployment-payload">
-        <h2 class="success-header">[PASS] DEPLOYMENT SUCCESSFUL</h2>
-        <p>System coverage at 100%. All parameters verified.</p>
-        <br>
-        <p>Write your actual, unencrypted message here. Format it flawlessly. Break down the logic of why she passed the test suite of your life.</p>
+    <!-- PHASE 2: VS Code Editor -->
+    <div id="editor-phase">
+        <div class="vs-tabs">
+            <div class="vs-tab">messageToSayed.js</div>
+            <div style="padding: 8px 15px; color: #858585;">package.json</div>
+        </div>
+        <div class="editor-layout">
+            <div class="line-numbers">
+                1<br>2<br>3<br>4<br>5<br>6
+            </div>
+            <div class="code-area">
+                <div class="ide-instruction">// Write a deployment script or message for me below.</div>
+                <div class="ide-instruction">// Must be written before system execution can proceed.</div>
+                <div style="color: #569cd6; margin-bottom: 5px;">const <span style="color: #4fc1ff;">deploymentMessage</span> = <span style="color: #ce9178;">`</span></div>
+                <textarea id="user-code" placeholder="Type your code/message here..."></textarea>
+                <div style="color: #ce9178;">`<span style="color: #d4d4d4;">;</span></div>
+            </div>
+        </div>
+        <div class="action-bar">
+            <button class="btn-execute" onclick="runExecution()">▶ Execute Code</button>
+        </div>
     </div>
+
+    <!-- PHASE 3: Execution Terminal -->
+    <div id="execution-phase">
+        <div class="term-line" id="term-1">C:\Users\Sayed\Environment> node deploy.js</div>
+        <div class="term-line" id="term-2">> Compiling user script...</div>
+        <div class="term-line" id="term-3">> Validating message syntax... [OK]</div>
+        <div class="term-line" id="term-4">> Establishing secure connection...</div>
+        <div class="term-line" id="term-5">> Executing payload...</div>
+    </div>
+
+    <!-- PHASE 4: Final Message -->
+    <div id="payload-phase">
+        <div class="payload-header">STATUS: 200 OK - DEPLOYMENT SUCCESSFUL</div>
+        <div class="payload-content">
+            <p><strong>To the girl who patched all the bugs in my life:</strong></p>
+            <br>
+            <p>Write your actual, beautifully structured message right here. Break down the logic of why she matters to you. No gimmicks, just clean, irrefutable truth formatted with high-end typography.</p>
+        </div>
+    </div>
+
 </div>
 
 <script>
     let passedTests = 0;
     const totalTests = 3;
 
-    // Strict 12-hour AM/PM initialization timestamp
+    // Strict 12-hour AM/PM format logic
     function initTimestamp() {
         const now = new Date();
         let hours = now.getHours();
@@ -196,7 +343,7 @@
         const ampm = hours >= 12 ? 'PM' : 'AM';
         
         hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
+        hours = hours ? hours : 12; 
         minutes = minutes < 10 ? '0' + minutes : minutes;
         
         const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${hours}:${minutes} ${ampm}`;
@@ -205,7 +352,7 @@
 
     initTimestamp();
 
-    // Test execution logic
+    // QA Pipeline Logic
     function executeTest(testId, expectedValue) {
         const inputElement = document.getElementById(`input-${testId}`);
         const userValue = inputElement.value.trim().toLowerCase();
@@ -213,7 +360,6 @@
         const logLine = document.getElementById(`log-${testId}`);
 
         if (userValue === expectedValue.toLowerCase()) {
-            // Prevent double counting if already passed
             if (!testContainer.classList.contains('passed')) {
                 testContainer.classList.add('passed');
                 logLine.innerText = `[PASS] Parameter resolved. Test executed successfully.`;
@@ -235,17 +381,52 @@
         const coverageDisplay = document.getElementById('coverage-status');
         
         if (passedTests === totalTests) {
-            coverageDisplay.innerText = `Coverage: 100% | Status: DEPLOYING...`;
+            coverageDisplay.innerText = `Coverage: 100% | Status: REDIRECTING TO IDE...`;
             coverageDisplay.style.color = '#3fb950';
-            setTimeout(deployPayload, 800);
+            setTimeout(() => {
+                document.getElementById('pipeline-phase').style.display = 'none';
+                document.getElementById('editor-phase').style.display = 'block';
+            }, 1200);
         } else {
             coverageDisplay.innerText = `Coverage: ${percentage}% | Status: BLOCKED`;
         }
     }
 
-    function deployPayload() {
-        document.getElementById('test-suite').style.display = 'none';
-        document.getElementById('deployment-payload').style.display = 'block';
+    // IDE Execution Logic
+    function runExecution() {
+        const userCode = document.getElementById('user-code').value.trim();
+        
+        // Ensure she actually writes something
+        if (userCode.length < 3) {
+            alert("Exception: Script is empty. Please write a message before executing.");
+            return;
+        }
+
+        // Hide editor, show terminal
+        document.getElementById('editor-phase').style.display = 'none';
+        document.getElementById('execution-phase').style.display = 'block';
+
+        // Terminal animation sequence
+        const lines = [1, 2, 3, 4, 5];
+        let delay = 0;
+
+        lines.forEach((lineNum, index) => {
+            setTimeout(() => {
+                document.getElementById(`term-${lineNum}`).style.opacity = '1';
+                
+                // If it's the last line, trigger the final reveal
+                if (index === lines.length - 1) {
+                    setTimeout(revealPayload, 1000);
+                }
+            }, delay);
+            // Stagger the terminal lines appearing
+            delay += Math.floor(Math.random() * 600) + 400; 
+        });
+    }
+
+    function revealPayload() {
+        document.getElementById('execution-phase').style.display = 'none';
+        document.getElementById('payload-phase').style.display = 'block';
     }
 </script>
 
