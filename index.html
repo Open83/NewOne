@@ -111,22 +111,15 @@
         textarea {
             width: 100%;
             flex: 1;
-            background: rgba(255, 0, 0, 0.05);
-            border: 1px dashed #ff4444;
+            background: transparent;
+            border: none;
             color: #ce9178;
             outline: none;
             resize: none;
             font-size: 16px;
             line-height: 1.5;
             min-height: 150px;
-            padding: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        textarea.unlocked {
-            background: transparent;
-            border: none;
-            padding: 0;
+            padding: 5px 0;
         }
 
         .action-bar {
@@ -140,15 +133,11 @@
             gap: 10px;
         }
 
-        .btn-record { background: transparent; border: 1px solid #ff4444; color: #ff4444; display: flex; align-items: center; gap: 8px; }
-        .btn-record.active { background: rgba(255, 68, 68, 0.1); animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
-        }
+        .btn-download { background: transparent; border: 1px solid #58a6ff; color: #58a6ff; display: flex; align-items: center; gap: 8px; }
+        .btn-download:hover { background: rgba(88, 166, 255, 0.1); }
+        .btn-download.success { border-color: var(--pass-color); color: var(--pass-color); }
 
-        .btn-execute { background: var(--vs-accent); color: white; opacity: 1; }
+        .btn-execute { background: var(--vs-accent); color: white; opacity: 1; transition: all 0.3s; }
         .btn-execute:hover:not(:disabled) { background: #005f9e; }
         .btn-execute:disabled { background: #333; color: #666; cursor: not-allowed; }
 
@@ -196,27 +185,25 @@
 
     <div id="editor-phase">
         <div class="vs-tabs">
-            <div class="vs-tab">message.js</div>
+            <div class="vs-tab">deployment_script.js</div>
         </div>
         <div class="editor-layout">
             <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6</div>
             <div class="code-area">
-                <div class="ide-instruction">// SYSTEM LOCK: Front-facing camera log must be initialized before execution.</div>
+                <div class="ide-instruction">// SYSTEM LOCK: Payload script must be securely saved to local device before execution.</div>
                 <div class="ide-instruction">// Write your deployment payload string below.</div>
                 <div style="color: #569cd6; margin-bottom: 5px;">const <span style="color: #4fc1ff;">deploymentMessage</span> = <span style="color: #ce9178;">`</span></div>
                 
                 <textarea id="user-code" 
-                          placeholder="SYSTEM EXCEPTION: Write access denied. Start camera log to unlock." 
-                          readonly 
-                          onclick="checkLock()"
+                          placeholder="Write your message here..." 
                           oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
                           
                 <div style="color: #ce9178; margin-top: 5px;">`<span style="color: #d4d4d4;">;</span></div>
             </div>
         </div>
         <div class="action-bar">
-            <button class="btn-record" id="btn-record" onclick="toggleRecording()">
-                <span>⏺ Start Camera Log</span>
+            <button class="btn-download" id="btn-download" onclick="downloadLog()">
+                <span>💾 Save & Download Script</span>
             </button>
             <button class="btn-execute" id="btn-execute" onclick="runExecution()" disabled>▶ Execute Code</button>
         </div>
@@ -224,10 +211,10 @@
 
     <div id="execution-phase">
         <div class="term-line" id="term-1">C:\System\Environment> node deploy.js</div>
-        <div class="term-line" id="term-2">> Stopping camera feed & saving locally...</div>
-        <div class="term-line" id="term-3">> Compiling user script... [OK]</div>
+        <div class="term-line" id="term-2">> Verifying local script integrity... [OK]</div>
+        <div class="term-line" id="term-3">> Compiling payload... [OK]</div>
         <div class="term-line" id="term-4">> Establishing secure connection...</div>
-        <div class="term-line" id="term-5">> Executing payload...</div>
+        <div class="term-line" id="term-5">> Executing deployment override...</div>
     </div>
 
     <div id="payload-phase">
@@ -239,29 +226,25 @@
             <br>
             <p>Over our total utilization, you have consistently been the only variable that matters. You handle my stress, you match my energy, and you set the standard for everything I want to build.</p>
             <br>
-            <p>Your reaction is saved. Your code is executed. And my commitment to you is fully deployed.</p>
+            <p>Your script is saved safely on your device. Your code is executed. And my commitment to you is fully deployed.</p>
         </div>
     </div>
 
 </div>
 
 <script>
-    // --- AUTOMATED TIME INIT (Strict 12-hour AM/PM) ---
+    // --- AUTOMATED TIME INIT ---
     function initTimestamp() {
         const now = new Date();
         let hours = now.getHours();
         let minutes = now.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        
         hours = hours % 12;
         hours = hours ? hours : 12; 
         minutes = minutes < 10 ? '0' + minutes : minutes;
-        
         const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${hours}:${minutes} ${ampm}`;
         document.getElementById('timestamp').innerText = timeString;
     }
-    
-    // Fire immediately on load
     initTimestamp();
 
     // --- PIPELINE LOGIC ---
@@ -297,82 +280,92 @@
         }
     }
 
-    // --- FRONT CAMERA LOGIC & UI LOCK ---
-    let mediaRecorder;
-    let recordedChunks = [];
-    let isRecording = false;
-
-    function checkLock() {
-        if (!isRecording) {
-            alert("SYSTEM EXCEPTION: Write access denied.\n\nYou must click 'Start Camera Log' before you can write the payload script.");
-        }
-    }
-
-    async function toggleRecording() {
-        const btnRecord = document.getElementById('btn-record');
-        const textArea = document.getElementById('user-code');
+    // --- FILE DOWNLOAD LOGIC (Now fully responsive) ---
+    function downloadLog() {
+        const userCode = document.getElementById('user-code').value.trim();
         
-        if (!isRecording) {
-            try {
-                // Request front-facing camera instead of screen recording
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "user" },
-                    audio: false
-                });
-
-                mediaRecorder = new MediaRecorder(stream);
-                
-                mediaRecorder.ondataavailable = function(e) {
-                    if (e.data.size > 0) {
-                        recordedChunks.push(e.data);
-                    }
-                };
-
-                mediaRecorder.onstop = function() {
-                    const blob = new Blob(recordedChunks, { type: 'video/mp4' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'Deployment_Reaction.mp4';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    stream.getTracks().forEach(track => track.stop());
-                };
-
-                mediaRecorder.start();
-                isRecording = true;
-                
-                // UNLOCK THE TEXT AREA
-                textArea.removeAttribute('readonly');
-                textArea.classList.add('unlocked');
-                textArea.placeholder = "Write your deployment message here...";
-                
-                // Update UI state
-                btnRecord.classList.add('active');
-                btnRecord.innerHTML = '🔴 Recording Reaction...';
-                document.getElementById('btn-execute').disabled = false;
-                
-            } catch (err) {
-                alert("SYSTEM EXCEPTION: Camera permission denied.\n\nYou must allow camera access to record your reaction and unlock the terminal.");
-            }
+        if (userCode.length < 3) {
+            alert("Exception: Script is empty. Please write a message before saving.");
+            return;
         }
+
+        // Creates a beautiful, self-contained HTML file engineered for mobile text wrapping
+        const fileContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Deployment Log</title>
+            <style>
+                body { 
+                    background-color: #1e1e1e; 
+                    color: #d4d4d4; 
+                    font-family: 'Courier New', Courier, monospace; 
+                    padding: 20px; 
+                    margin: 0;
+                    line-height: 1.6; 
+                }
+                .wrapper {
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                .comment { color: #6a9955; margin-bottom: 20px; font-size: 0.9rem; }
+                .keyword { color: #569cd6; }
+                .variable { color: #4fc1ff; }
+                .string { 
+                    color: #ce9178; 
+                    white-space: pre-wrap;       /* Respects line breaks */
+                    word-wrap: break-word;       /* Prevents horizontal overflow */
+                    overflow-wrap: break-word;   /* Modern wrapping standard */
+                    font-size: 1rem;
+                }
+                .container { 
+                    border-left: 2px solid #404040; 
+                    padding-left: 15px; 
+                    margin-left: 5px; 
+                }
+                @media (min-width: 768px) {
+                    body { padding: 40px; }
+                    .container { padding-left: 20px; margin-left: 10px; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="wrapper">
+                <div class="comment">// SYSTEM LOG SECURED<br>// Execution Timestamp: ${document.getElementById('timestamp').innerText}</div>
+                <div class="container">
+                    <div><span class="keyword">const</span> <span class="variable">deploymentMessage</span> = <span class="string">\`</span></div>
+                    <div class="string">${userCode.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+                    <div><span class="string">\`</span>;</div>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
+        const blob = new Blob([fileContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'Deployment_Script.html';
+        document.body.appendChild(a);
+        a.click();
+        
+        window.URL.revokeObjectURL(url);
+
+        // Update UI to show success and unlock Execute button
+        const btnDownload = document.getElementById('btn-download');
+        btnDownload.classList.add('success');
+        btnDownload.innerHTML = '<span>✓ Script Saved Successfully</span>';
+        
+        document.getElementById('btn-execute').disabled = false;
     }
 
     // --- IDE EXECUTION LOGIC ---
     function runExecution() {
-        const userCode = document.getElementById('user-code').value.trim();
-        
-        if (userCode.length < 3) {
-            alert("Exception: Script is empty. Please write a message before executing.");
-            return;
-        }
-
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-        }
-
         document.getElementById('editor-phase').style.display = 'none';
         document.getElementById('execution-phase').style.display = 'block';
 
